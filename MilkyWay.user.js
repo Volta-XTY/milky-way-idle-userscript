@@ -7,12 +7,89 @@
 // @match        https://www.milkywayidle.com/game?*
 // @icon         http://milkywayidle.com/favicon.ico
 // @require      https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js
-// @require          https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js
-// @require          https://cdn.jsdelivr.net/npm/chartjs-plugin-crosshair@2.0.0/dist/chartjs-plugin-crosshair.min.js
+// @require      https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js
+// @require      https://cdn.jsdelivr.net/npm/chartjs-plugin-crosshair@2.0.0/dist/chartjs-plugin-crosshair.min.js
 // @grant        none
 // @run-at       document-start
 // ==/UserScript==
 (async () => {
+const skillNames =  {
+'/skills/total_level': '\u603b\u7b49\u7ea7',
+'/skills/milking': '\u6324\u5976',
+'/skills/foraging': '\u91c7\u6458',
+'/skills/woodcutting': '\u4f10\u6728',
+'/skills/cheesesmithing': '\u5976\u916a\u953b\u9020',
+'/skills/crafting': '\u5236\u4f5c',
+'/skills/tailoring': '\u7f1d\u7eab',
+'/skills/cooking': '\u70f9\u996a',
+'/skills/brewing': '\u51b2\u6ce1',
+'/skills/alchemy': '\u70bc\u91d1',
+'/skills/enhancing': '\u5f3a\u5316',
+'/skills/stamina': '\u8010\u529b',
+'/skills/intelligence': '\u667a\u529b',
+'/skills/attack': '\u653b\u51fb',
+'/skills/power': '\u529b\u91cf',
+'/skills/defense': '\u9632\u5fa1',
+'/skills/ranged': '\u8fdc\u7a0b',
+'/skills/magic': '\u9b54\u6cd5'
+};
+const abilityNames = {
+'/abilities/poke': '\u7834\u80c6\u4e4b\u523a',
+'/abilities/impale': '\u900f\u9aa8\u4e4b\u523a',
+'/abilities/puncture': '\u7834\u7532\u4e4b\u523a',
+'/abilities/penetrating_strike': '\u8d2f\u5fc3\u4e4b\u523a',
+'/abilities/scratch': '\u722a\u5f71\u65a9',
+'/abilities/cleave': '\u5206\u88c2\u65a9',
+'/abilities/maim': '\u8840\u5203\u65a9',
+'/abilities/crippling_slash': '\u81f4\u6b8b\u65a9',
+'/abilities/smack': '\u91cd\u78be',
+'/abilities/sweep': '\u91cd\u626b',
+'/abilities/stunning_blow': '\u91cd\u9524',
+'/abilities/quick_shot': '\u5feb\u901f\u5c04\u51fb',
+'/abilities/aqua_arrow': '\u6d41\u6c34\u7bad',
+'/abilities/flame_arrow': '\u70c8\u7130\u7bad',
+'/abilities/rain_of_arrows': '\u7bad\u96e8',
+'/abilities/silencing_shot': '\u6c89\u9ed8\u4e4b\u7bad',
+'/abilities/steady_shot': '\u7a33\u5b9a\u5c04\u51fb',
+'/abilities/pestilent_shot': '\u75ab\u75c5\u5c04\u51fb',
+'/abilities/penetrating_shot': '\u8d2f\u7a7f\u5c04\u51fb',
+'/abilities/water_strike': '\u6d41\u6c34\u51b2\u51fb',
+'/abilities/ice_spear': '\u51b0\u67aa\u672f',
+'/abilities/frost_surge': '\u51b0\u971c\u7206\u88c2',
+'/abilities/mana_spring': '\u6cd5\u529b\u55b7\u6cc9',
+'/abilities/entangle': '\u7f20\u7ed5',
+'/abilities/toxic_pollen': '\u5267\u6bd2\u7c89\u5c18',
+'/abilities/natures_veil': '\u81ea\u7136\u83cc\u5e55',
+'/abilities/fireball': '\u706b\u7403',
+'/abilities/flame_blast': '\u7194\u5ca9\u7206\u88c2',
+'/abilities/firestorm': '\u706b\u7130\u98ce\u66b4',
+'/abilities/smoke_burst': '\u70df\u7206\u706d\u5f71',
+'/abilities/minor_heal': '\u521d\u7ea7\u81ea\u6108\u672f',
+'/abilities/heal': '\u81ea\u6108\u672f',
+'/abilities/quick_aid': '\u5feb\u901f\u6cbb\u7597\u672f',
+'/abilities/rejuvenate': '\u7fa4\u4f53\u6cbb\u7597\u672f',
+'/abilities/taunt': '\u5632\u8bbd',
+'/abilities/provoke': '\u6311\u8845',
+'/abilities/toughness': '\u575a\u97e7',
+'/abilities/elusiveness': '\u95ea\u907f',
+'/abilities/precision': '\u7cbe\u786e',
+'/abilities/berserk': '\u72c2\u66b4',
+'/abilities/frenzy': '\u72c2\u901f',
+'/abilities/elemental_affinity': '\u5143\u7d20\u589e\u5e45',
+'/abilities/spike_shell': '\u5c16\u523a\u9632\u62a4',
+'/abilities/arcane_reflection': '\u5965\u672f\u53cd\u5c04',
+'/abilities/vampirism': '\u5438\u8840',
+'/abilities/revive': '\u590d\u6d3b',
+'/abilities/insanity': '\u75af\u72c2',
+'/abilities/invincible': '\u65e0\u654c',
+'/abilities/fierce_aura': '\u7269\u7406\u5149\u73af',
+'/abilities/aqua_aura': '\u6d41\u6c34\u5149\u73af',
+'/abilities/sylvan_aura': '\u81ea\u7136\u5149\u73af',
+'/abilities/flame_aura': '\u706b\u7130\u5149\u73af',
+'/abilities/speed_aura': '\u901f\u5ea6\u5149\u73af',
+'/abilities/critical_aura': '\u66b4\u51fb\u5149\u73af',
+'/abilities/promote': '\u664b\u5347'
+};
 class ObjectStoreMeta {
     constructor(name, options, indexArr) {
         this.name = name;
@@ -61,6 +138,16 @@ const DatabaseStructure = [
         {keyPath: "dateTime"},
         [
             "activePlayerCount",
+        ]
+    ),
+    new ObjectStoreMeta(
+        "GuildMemberStatLog",
+        {autoIncrement: true},
+        [
+            "guildID",
+            "characterID",
+            "guildExperience",
+            "dateTime"
         ]
     )
 ];
@@ -229,10 +316,18 @@ img.user-avatar{
     width: 100%;
     height: 100%;
 }
+.HitpointsBar_currentHp__5exLr, .ManapointsBar_currentMp__3xpqC{
+    transition: transform 0.3s ease;
+}
+.
 `;
 const clientData = JSON.parse(window.localStorage.getItem("initClientData"));
-const itemHrid2CN = new Map(Object.entries(JSON.parse(window.localStorage.getItem("ItemNames"))));
-const CN2ItemHrid = new Map([...itemHrid2CN.entries()].map(([En, Ch]) => [Ch, En]));
+const Hrid2CN = new Map([
+    ...Object.entries(JSON.parse(window.localStorage.getItem("ItemNames"))),
+    ...Object.entries(skillNames),
+    ...Object.entries(abilityNames),
+]);
+const CN2ItemHrid = new Map([...Hrid2CN.entries()].map(([En, Ch]) => [Ch, En]));
 const InsertStyleSheet = (style) => {
     const s = new CSSStyleSheet();
     s.replaceSync(style);
@@ -263,20 +358,6 @@ const HTML = (tagname, attrs, ...children) => {
     return ele;
 };
 const NotificationHooks = [];
-const ReplaceAvatar = () => {
-    document.querySelectorAll("div:not(.checked)").forEach((div) =>{
-        const className = div.getAttribute("class");
-        if(className?.startsWith("FullAvatar_avatar__")){
-            div.children[0].replaceWith(
-                HTML("img", {class: "user-avatar Icon_icon__2LtL_", role: "img", "aria-label": "avatar", src: "https://s2.loli.net/2025/03/23/wNU8DaFne3qRhiS.jpg"})
-            );
-        }
-        if(className?.startsWith("FullAvatar_avatarOutfit__")){
-            div.remove();
-        }
-        div.classList.add("checked");
-    })
-}
 const AddOrderCountButton = () => {
     document.querySelectorAll("div:not(.checked)").forEach((div) => {
         const className = div.getAttribute("class");
@@ -292,11 +373,11 @@ const AddOrderCountButton = () => {
     })
 }
 const ObserveExperienceBar = () => {
-    document.querySelectorAll("div.NavigationBar_experienceBar__2fo3Q > div.NavigationBar_currentExperience__3GDeX:not(.observing)").forEach(div => {
+    document.querySelectorAll("div.NavigationBar_experienceBar__2fo3Q > div.NavigationBar_currentExperience__3GDeX:not([observing])").forEach(div => {
         const target = div.parentElement.parentElement.children[0].children[1];
-        target.classList.add("observing");
+        div.setAttribute("observing", "");
         const OnMutate = () => {
-            const lvl = Math.floor(Number(target.textContent));
+            const lvl = Math.floor(Number(target.textContent.split("+").at(0)));
             const percent = Number(div.style.width.slice(0, -1)) / 100;
             target.textContent = `${lvl}.${percent.toFixed(6).slice(2)}`;
         };
@@ -328,6 +409,7 @@ const ObserveMarketElements = () => {
     if(!marketPanelEle) return;
     const tabs = marketPanelEle.querySelector(":scope div.MuiTabs-flexContainer")?.children;
     if(!tabs) return;
+    if(tabs.length !== 6) return;
     marketPanelEle.setAttribute("observing", "");
     let lastName = "";
     const categoryCache = new Map();
@@ -348,12 +430,31 @@ const ObserveMarketElements = () => {
             body: categoryCache.get(categoryName),
         }).then(res => res.json()).then(ColorMarketItems);
     };
-    if(tabs.length !== 6) alert("市场物品分类数不等于6");
     new MutationObserver(callback).observe(marketPanelEle, {attributeFilter: ["class"], attributes: true});
     for(let i = 0; i < 6; i++){
         new MutationObserver(callback).observe(tabs[i], {attributeFilter: ["class"], attributes: true});
     }
     callback();
+}
+const AddBattleCountInputButton = () => {
+    document.querySelectorAll("div.CombatZones_combatZones__6VliY div.SkillActionDetail_label__1mGQJ").forEach(div => {
+        if(div.textContent !== "战斗" || div.hasAttribute("checked")) return;
+        div.setAttribute("checked", "");
+        const input = div.nextElementSibling.children[0].children[0];
+        const _click = () => {
+            const prev = input.value;
+            input.value = 9;
+            const ev = new Event("input", {bubbles: true});
+            ev.simulated = true;
+            const tracker = input._valueTracker;
+            if(tracker) tracker.setValue(prev);
+            input.dispatchEvent(ev);
+        };
+        div.nextElementSibling.insertAdjacentElement("afterend",
+            HTML("button", {class: "Button_button__1Fe9z Button_small__3fqC7", _click: _click}, 9)
+        )
+        _click();
+    })
 }
 const OnMutate = (mutlist, observer) => {
     observer.disconnect();
@@ -361,6 +462,7 @@ const OnMutate = (mutlist, observer) => {
     //AddOrderCountButton(); //TODO
     ObserveExperienceBar();
     ObserveMarketElements();
+    AddBattleCountInputButton();
     observer.observe(document, {subtree: true, childList: true});
 };
 new MutationObserver(OnMutate).observe(document, {subtree: true, childList: true});
@@ -397,6 +499,13 @@ window.QueryMarket = async (itemHrid, askData = true) => {
         };
     });
     console.log(result);
+}
+window.QueryChat = async (playerName) => {
+    let result = await IDBRead("ChatMessage", playerName, {isIndex: true, indexName: "senderName", multi: true});
+    result.sort((a, b) => b.timestamp - a.timestamp);
+    console.log(`${playerName}的所有发言：`);
+    for(const message of result)
+        console.log(new Date(message.timestamp).toString(), message.message);
 }
 window.ToggleChart = async (type) => {
     switch(type){
@@ -452,9 +561,9 @@ window.WebSocket = function (...args) {
     const ws = new OriginalWebSocket(...args);
     ws.addEventListener('message', (event) => {
         const json = event.data;
+        console.log(json);
         try{
             const obj = JSON.parse(json);
-            console.log(obj);
             switch(obj.type){
                 case "market_item_order_books_updated":{
                     obj.marketItemOrderBooks.dateTime = new Date().getTime();
@@ -470,8 +579,11 @@ window.WebSocket = function (...args) {
                     if(obj.message.isModMessage || obj.message.seacialChatIconHrid === "/chat_icons/moderator"){
                         new Notification(`管理员 ${obj.message.senderName} 的发言：`, {body: obj.message.message});
                     }
-                    if(obj.message.channelTypeHrid === "/chat_channel_types/guild" && obj.message.senderName !== "VoltaX"){
-                        new Notification(`${obj.message.senderName}: `, {body: obj.message.message})
+                    if(obj.message.channelTypeHrid === "/chat_channel_types/guild" && obj.message.senderName !== UserStat.character.name){
+                        new Notification(`${obj.message.senderName}: `, {body: obj.message.message, requireInteraction: !document.hasFocus()})
+                    }
+                    if(obj.message.channelTypeHrid === "/chat_channel_types/whisper" && obj.message.senderName !== UserStat.character.name){
+                        new Notification(`${obj.message.senderName}: `, {body: obj.message.message, requireInteraction: !document.hasFocus()});
                     }
                     IDBAdd("ChatMessage", obj.message);
                     break;
@@ -486,15 +598,27 @@ window.WebSocket = function (...args) {
                 }
                 case "market_listings_updated":{
                     for(const listing of obj.endMarketListings){
-                        const count = listing.isSell ? listing.unclaimedCoinCount / (listing.price - Math.floor(listing.price* 0.02)) : list.unclaimedItemCount;
+                        const count = listing.isSell ? listing.unclaimedCoinCount / (listing.price - Math.floor(listing.price * 0.02)) : listing.unclaimedItemCount;
                         if(count >= 10 || count / listing.orderQuantity >= 0.1)
-                            new Notification(`${listing.isSell ? "卖出" : "收购"} ${itemHrid2CN.get(listing.itemHrid)} ${count}`);
+                            new Notification(`${listing.isSell ? "卖出" : "收购"} ${Hrid2CN.get(listing.itemHrid)} ${count}`);
                     }
                     break;
                 }
                 case "active_player_count_updated":{
                     IDBAdd("ActivePlayerLog", {dateTime: new Date().getTime(), activePlayerCount: obj.activePlayerCount});
                     break;
+                }
+                case "actions_updated":{
+                    if(obj.endCharacterActions[0].isDone){
+                        new Notification("工作完成！", { requireInteraction: !document.hasFocus(), });
+                        window.focus();
+                    }
+                    break;
+                }
+                case "info":{
+                    if(obj.message === "infoNotification.characterLeveledUp"){
+                        new Notification(`${Hrid2CN.get(obj.variables[1].data.split(".").at(-1))} 升级至 ${obj.variables[0].data} 级`, {requireInteraction: !document.hasFocus()});
+                    }
                 }
             }
         }
