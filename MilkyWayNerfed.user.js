@@ -1082,12 +1082,6 @@ document.addEventListener("keydown", (ev) => {
     }
     if(!ev.altKey) return;
     switch(ev.code){
-        case "KeyA":
-            ToggleChart("ActivePlayer");
-            break;
-        case "KeyP":
-            ToggleProfitPanel();
-            break;
         case "KeyQ":
             FindBackToMarketButton();
             break;
