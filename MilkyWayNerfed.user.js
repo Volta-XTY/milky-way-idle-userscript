@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         银河奶牛便携脚本阉割版 by VoltaXTY
+// @name         银河奶牛便携脚本青春版 by VoltaXTY
 // @namespace    http://tampermonkey.net/
 // @version      2025-03-16
 // @description  try to take over the world!
@@ -927,7 +927,160 @@ const InsertStyleSheet = (style) => {
     s.replaceSync(style);
     document.adoptedStyleSheets = [...document.adoptedStyleSheets, s];
 };
-let REG_HTML = null;
+class ObjectStoreMeta {
+    constructor(name, options, indexArr) {
+        this.name = name;
+        this.options = options;
+        this.keyPath = options?.keyPath;
+        this.autoIncrement = (options?.autoIncrement) ?? false;
+        this.index = indexArr;
+    }
+};
+const DatabaseStructure = [
+    new ObjectStoreMeta(
+        "ChatMessage",
+        {keyPath: "id"},
+        [
+            "channelTypeHrid",
+            "timestamp",
+            "characterID",
+            "guildID",
+            "partyID",
+            "isSystemMessage",
+            "isModMessage",
+            "gameMode",
+            "specialChatIconHrid",
+            "chatIconHrid",
+            "nameColorHrid",
+            "senderName",
+            "receiverCharacterID",
+            "receiverName",
+            "message",
+            "linksMetadata",
+            "cannotBlock",
+            "isDeleted",
+        ]
+    ),
+    new ObjectStoreMeta(
+        "MarketInfo",
+        {autoIncrement: true},
+        [
+            "itemHrid",
+            "orderBooks",
+            "dateTime",
+        ]
+    ),
+    new ObjectStoreMeta(
+        "ActivePlayerLog",
+        {keyPath: "dateTime"},
+        [
+            "activePlayerCount",
+        ]
+    ),
+    new ObjectStoreMeta(
+        "GuildMemberStatLog",
+        {autoIncrement: true},
+        [
+            "guildID",
+            "characterID",
+            "guildExperience",
+            "dateTime"
+        ]
+    )
+];
+const DatabaseVersion = 5;
+const InitDatabase = () => {
+    return new Promise((res, err) => {
+        const openRequest = window.indexedDB.open("MilkyWaySocketData", DatabaseVersion);
+        openRequest.onupgradeneeded = async (event) => {
+            const transaction = event.target.transaction;
+            const db = event.target.result;
+            const currNames = db.objectStoreNames;
+            console.log(`List of object stores in older version:`, currNames);
+            for(let i = 0; i < currNames.length; i++){
+                const name = currNames.item(i);
+                const objectStore = transaction.objectStore(name);
+                const meta = DatabaseStructure.find(meta => meta.name === name);
+                if(!meta || objectStore.keyPath !== (meta.keyPath ?? "") || objectStore.autoIncrement !== (meta.autoIncrement ?? false)){
+                    db.deleteObjectStore(name);
+                    console.log(`Object store ${name} was deleted`);
+                }
+            }
+            const afterDeletion = db.objectStoreNames;
+            for(const meta of DatabaseStructure){
+                let objectStore;
+                if(!afterDeletion.contains(meta.name)){
+                    objectStore = db.createObjectStore(meta.name, meta.options);
+                    console.log(`Object store ${meta.name} is to be created.`);
+                }
+                else objectStore = transaction.objectStore(meta.name);
+                const currIndexes = objectStore.indexNames;
+                console.log(`List of plain indexes in object store ${meta.name}:`, currIndexes);
+                for(let i = 0; i < currIndexes.length; i++){
+                    const indexName = currIndexes.item(i);
+                    if(!meta.index.includes(indexName))
+                        objectStore.deleteIndex(indexName);
+                }
+                const indexAfterDeletion = objectStore.indexNames;
+                for(const indexName of meta.index){
+                    if(!indexAfterDeletion.contains(indexName)){
+                        objectStore.createIndex(indexName, indexName);
+                    }
+                }
+                console.log(`List of plain indexes in object store ${meta.name} after modification:`, objectStore.indexNames);
+            }
+        }
+        openRequest.onerror = (event) => err(event);
+        openRequest.onsuccess = (event) => res(event.target.result);
+    })
+};
+const db = await InitDatabase();
+const IDBRead = async(storeName, key, {isIndex = false, indexName = "", update = false, multi = false} = {}) => {
+    //console.log(`IDBRead(): storeName=${storeName}, key=${key}, isIndex=${isIndex}, indexName="${indexName}", update=${update}, multi=${multi}`);
+    const searchReq = isIndex ?
+        db.transaction([storeName], update ? "readwrite" : "readonly").objectStore(storeName).index(indexName).openCursor(key) :
+        db.transaction([storeName], update ? "readwrite" : "readonly").objectStore(storeName).openCursor(key);
+    const value = await new Promise((res, err) => {
+        let result = [];
+        searchReq.onerror = (event) => {console.error(event); err(event)};
+        searchReq.onsuccess = multi ?
+        (event) => {
+            const cursor = event.target.result;
+            if(cursor){
+                result.push(cursor.value);
+                cursor.continue();
+            }
+            else res(result);
+        }:
+        (event) => {
+            const cursor = event.target.result;
+            if(cursor) res(cursor);
+            else res(undefined);
+        }
+    });
+    return value;
+};
+const IDBAdd = async (storeName, data) => {
+    //console.log("IDBAdd(): ", storeName, data);
+    const Store = db.transaction([storeName], "readwrite");
+    const addReq = Store.objectStore(storeName).add(data);
+    const success = new Promise((res, err) => {
+        addReq.onerror = (event) => {console.error(`Error occurred while trying add`, data, `to objectStore ${storeName}: `, event); err(event)};
+        addReq.onsuccess = (event) => {res(event)};
+    });
+    const complete = new Promise((res, err) => {
+        Store.oncomplete = (event) => {res(event)};
+    })
+    await Promise.all([success, complete]);
+};
+const IDBUpdate = (cursor, newData) => {
+    //console.log(`IDBUpdate() | source: ${cursor.source instanceof IDBObjectStore ? cursor.source.name : `${cursor.source.objectStore}[${cursor.source.name}]`} | newData: `, newData);
+    return new Promise((res, rej) => {
+        const request = cursor.update(newData);
+        request.onsuccess = res;
+        request.onerror = rej;
+    });
+}
 InsertStyleSheet(css);
 const HTML = (tagname, attrs, ...children) => {
     let REG_FLAG = false;
@@ -951,7 +1104,6 @@ const HTML = (tagname, attrs, ...children) => {
     if(REG_FLAG) REG_HTML = ele;
     return ele;
 };
-const NotificationHooks = [];
 const ObserveExperienceBar = () => {
     document.querySelectorAll("div.NavigationBar_experienceBar__2fo3Q > div.NavigationBar_currentExperience__3GDeX:not([observing])").forEach(div => {
         const target = div.parentElement.parentElement.children[0].children[1];
@@ -1028,8 +1180,8 @@ const ProcessChatMessage = () => {
         const userName = div.querySelector(":scope div.CharacterName_name__1amXp")?.dataset?.name;
         if(!userName) return;
         const content = texts.map(span => span.textContent).join("");
-        div.insertAdjacentElement("beforeend",
-            HTML("button", {class: "comment-improvement-button repeat-comment-button", _click: () => {
+        if(content.length > 0){
+            const DoRepeat = () => {
                 const input = document.querySelector("input.Chat_chatInput__16dhX");
                 const prevVal = input.value;
                 input.value = content;
@@ -1038,27 +1190,32 @@ const ProcessChatMessage = () => {
                 const tracker = input._valueTracker;
                 if(tracker) tracker.setValue(prevVal);
                 input.dispatchEvent(ev);
-            }}, " + 1 ")
-        );
+            }
+            div.addEventListener("dblclick", DoRepeat);
+            div.insertAdjacentElement("beforeend",
+                HTML("button", {class: "comment-improvement-button repeat-comment-button", _click: DoRepeat}, " + 1 ")
+            );
+        }
+        const DoMention = () => {
+            const mentionStr = `@${userName}`;
+            const input = document.querySelector("input.Chat_chatInput__16dhX");
+            const prevVal = input.value;
+            if(prevVal.includes(mentionStr)) return;
+            input.value = `${mentionStr} ${prevVal}`;
+            const ev = new Event("input", {bubbles: true});
+            ev.simulated = true;
+            const tracker = input._valueTracker;
+            if(tracker) tracker.setValue(prevVal);
+            input.dispatchEvent(ev);
+        };
         div.insertAdjacentElement("beforeend",
-            HTML("button", {class: "comment-improvement-button mention-sender-button", _click: () => {
-                const mentionStr = `@${userName}`;
-                const input = document.querySelector("input.Chat_chatInput__16dhX");
-                const prevVal = input.value;
-                if(prevVal.includes(mentionStr)) return;
-                input.value = `${mentionStr} ${prevVal}`;
-                const ev = new Event("input", {bubbles: true});
-                ev.simulated = true;
-                const tracker = input._valueTracker;
-                if(tracker) tracker.setValue(prevVal);
-                input.dispatchEvent(ev);
-            }}, "@此人")
-        )
+            HTML("button", {class: "comment-improvement-button mention-sender-button", _click: DoMention}, "@此人")
+        );
+        div.addEventListener("auxclick", DoMention);
     })
 }
 const OnMutate = (mutlist, observer) => {
     observer.disconnect();
-    for(const hook of NotificationHooks) hook();
     //AddOrderCountButton(); //TODO
     ObserveExperienceBar();
     AddBattleCountInputButton();
@@ -1075,7 +1232,76 @@ const FindBackToMarketButton = () => {
         }
     }
 }
-// 保留 WebSocket 的其余属性和方法
+const OriginalWebSocket = window.WebSocket;
+window.WebSocket = function (...args) {
+    const ws = new OriginalWebSocket(...args);
+    ws.addEventListener('message', (event) => {
+        const json = event.data;
+        try{
+            const obj = JSON.parse(json);
+            switch(obj.type){
+                case "active_player_count_updated":{
+                    IDBAdd("ActivePlayerLog", {dateTime: new Date().getTime(), activePlayerCount: obj.activePlayerCount});
+                    break;
+                }
+            }
+        }
+        catch(e){
+            if(e instanceof SyntaxError) console.log("Syntax Error");
+            else console.error(e);
+        }
+    });
+
+    return ws;
+};
+const ToggleChart = async (type) => {
+    switch(type){
+        case "ActivePlayer": {
+            let ele = document.getElementById("ActivePlayerChart");
+            let data = await IDBRead("ActivePlayerLog", undefined, {multi: true});
+            data = data.map(({dateTime, activePlayerCount}) => ({x: dateTime, y: activePlayerCount})).sort((a, b) => a.x - b.x);
+            console.log("数据点数目：", data.length);
+            if(ele){
+                ele.classList.toggle("ujs-invisible");
+                break;
+            }
+            ele = HTML("div", {id: "ActivePlayerChart"},
+                HTML("canvas", {id: "ActivePlayerChartCanvas"})
+            );
+            document.body.append(ele);
+            const canvas = document.getElementById("ActivePlayerChartCanvas");
+            new ResizeObserver((entries) => {
+                const entry = entries.at(-1);
+                canvas.width = entry.contentBoxSize[0].inlineSize;
+                canvas.height = entry.contentBoxSize[0].blockSize;
+            }).observe(ele);
+            new Chart(canvas,{
+                type: "line",
+                data: {datasets: [{data: data}]},
+                options: {
+                    animation: false,
+                    parsing: false,
+                    scales: {
+                        x: {
+                            type: "time",
+                            time: {
+                                unit: "day",
+                                displayFormats: {
+                                    hour: "HH:mm",
+                                    day: "MM/dd",
+                                },
+                                ticks: {
+                                    color: "#FFFFFF",
+                                }
+                            }
+                        }
+                    }
+                }
+            })
+            break;
+        }
+    }
+}
 document.addEventListener("keydown", (ev) => {
     if(Notification.permission !== "granted"){
         Notification.requestPermission();
@@ -1084,6 +1310,9 @@ document.addEventListener("keydown", (ev) => {
     switch(ev.code){
         case "KeyQ":
             FindBackToMarketButton();
+            break;
+        case "KeyA":
+            ToggleChart("ActivePlayer");
             break;
     }
 });
