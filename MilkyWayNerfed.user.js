@@ -1177,6 +1177,7 @@ const ProcessChatMessage = () => {
     document.querySelectorAll("div.ChatHistory_chatHistory__1EiG3 > div.ChatMessage_chatMessage__2wev4:not([processed])").forEach(div => {
         div.setAttribute("processed", "");
         const texts = [...div.querySelectorAll(`:scope > span:not([style="display: inline-block;"]):not(.ChatMessage_timestamp__1iRZO)`)];
+        texts.forEach(text => text.textContent = text.textContent.replaceAll("喵", ""));
         const userName = div.querySelector(":scope div.CharacterName_name__1amXp")?.dataset?.name;
         if(!userName) return;
         const content = texts.map(span => span.textContent).join("");
@@ -1191,17 +1192,16 @@ const ProcessChatMessage = () => {
                 if(tracker) tracker.setValue(prevVal);
                 input.dispatchEvent(ev);
             }
-            div.addEventListener("dblclick", DoRepeat);
             div.insertAdjacentElement("beforeend",
                 HTML("button", {class: "comment-improvement-button repeat-comment-button", _click: DoRepeat}, " + 1 ")
             );
+            texts.forEach(text => text.addEventListener("click", DoRepeat));
         }
-        const DoMention = () => {
+        const DoMentionOrWhisper = (isMention) => () => {
             const mentionStr = `@${userName}`;
             const input = document.querySelector("input.Chat_chatInput__16dhX");
             const prevVal = input.value;
-            if(prevVal.includes(mentionStr)) return;
-            input.value = `${mentionStr} ${prevVal}`;
+            input.value = isMention ? `${mentionStr} ${prevVal.replaceAll(/@[a-zA-Z0-9]+/g, "")}` : `/w ${userName} ${prevVal.replaceAll(/\/w [a-zA-Z0-9]+/g, "")}`;
             const ev = new Event("input", {bubbles: true});
             ev.simulated = true;
             const tracker = input._valueTracker;
@@ -1209,9 +1209,11 @@ const ProcessChatMessage = () => {
             input.dispatchEvent(ev);
         };
         div.insertAdjacentElement("beforeend",
-            HTML("button", {class: "comment-improvement-button mention-sender-button", _click: DoMention}, "@此人")
+            HTML("button", {class: "comment-improvement-button mention-sender-button", _click: DoMentionOrWhisper(true)}, "@此人")
         );
-        div.addEventListener("auxclick", DoMention);
+        div.insertAdjacentElement("beforeend",
+            HTML("button", {class: "comment-improvement-button whisper-button", _click: DoMentionOrWhisper(false)}, "私聊")
+        );
     })
 }
 const OnMutate = (mutlist, observer) => {
