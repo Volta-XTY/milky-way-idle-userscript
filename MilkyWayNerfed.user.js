@@ -1107,16 +1107,21 @@ const HTML = (tagname, attrs, ...children) => {
 const ObserveExperienceBar = () => {
     document.querySelectorAll("div.NavigationBar_experienceBar__2fo3Q > div.NavigationBar_currentExperience__3GDeX:not([observing])").forEach(div => {
         const target = div.parentElement.parentElement.children[0].children[1];
+        const clone = target.cloneNode(true);
+        target.insertAdjacentElement("beforebegin", clone);
+        target.classList.add("ujs-invisible");
         div.setAttribute("observing", "");
         const OnMutate = () => {
-            const lvl = Math.floor(Number(target.textContent.split("+").at(0)));
+            const lvls = target.textContent.split("+");
+            const lvl = Number(lvls.at(0));
             const percent = Number(div.style.width.slice(0, -1)) / 100;
-            target.textContent = `${lvl}.${percent.toFixed(6).slice(2)}`;
+            clone.textContent = `${lvl}.${percent.toFixed(6).slice(2)}${lvls.length > 1 ? `+${lvls[1]}` : ""}`;
         };
         OnMutate();
         new MutationObserver(OnMutate).observe(div, {attributes: true, attributeFilter: ["style"]})
+        new MutationObserver(OnMutate).observe(target, {childList: true, subtree: true});
     })
-}
+};
 const AddBattleCountInputButton = () => {
     document.querySelectorAll("div.CombatZones_combatZones__6VliY div.SkillActionDetail_label__1mGQJ").forEach(div => {
         if(div.textContent !== "战斗" || div.hasAttribute("checked")) return;
