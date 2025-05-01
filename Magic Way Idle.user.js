@@ -497,7 +497,7 @@
   function _0x2fa894() {
     const _0x3b8849 = Object.getOwnPropertyDescriptor(MessageEvent.prototype, "data");
     const _0x120a2c = _0x3b8849.get;
-    _0x4a1ac9.gameRawData.firstRun = _0x120a2c.toString().includes(_0x420fa5("H9w^4*0Vy!z0I", 22));
+    _0x4a1ac9.gameRawData.firstRun = /* _0x120a2c.toString().includes(_0x420fa5("H9w^4*0Vy!z0I", 22)); */ true;
     _0x3b8849.get = _0x377bc7;
     Object.defineProperty(MessageEvent.prototype, 'data', _0x3b8849);
     function _0x377bc7() {
@@ -851,8 +851,8 @@
       }
     }
   }
-  function _0x1de009() {
-    const _0x534b65 = _0x420fa5("OOOOOilnpugwyp2h0lgrl5OOOOO\ntppj!$pihkhui$*+%*^nD;.ihxlmhhzjh)h;$$q9h$lhh_niht3 x.D^,*v _9R3\nR01!Bj?^>9zj6z3o/3l8l\"j!7tv>}^y,_8r}(<$j147 7\"j2={4%uC119sy>A.u)\n2Rnp>k:j9$lAh}{2slD^Co:nz-CD0*,1 \"|w*yn/up.BRl]#s}D=A5$R]!$!y[*,\n>@]#r@\",*?^z.Au7j o@:c_o+8@,h$tihhlj$5i5l(3:o]-y.w5r^7.-;Dy5nqRc\n.o2u7(|6&0>w?1<:pk<i,:cw#?2%%}8z$>0C6+\"y\"n$4nz}A{.ctk@qozB9uuR]\"\n;7z/}:cCzRk:y+(*]&\" vC(7^*=)lyct#_n5 RA=\"|y.RD|yr!\"1ww$D%6&71s{[\n0B2w)=@+m#ql>C4uhxqihv9yCv%4_lrw,?0]c?m y?2t#l]$^90\";%[5By|9x]] \nx:rj|0u.>8Chsx9]1@)7*((B/5x|R>R#C3#?hosp6{ljxxk8k*B{l!>Bt|/4;*y!\n>R|oq#;6\"rA&wj&n*,4p**hA_:3w;q#>+m#3t0\"7({&9phxs|>=mcsj#_]: m}kt\n7 Dkh*h*x.@p4;hz*%*^q*u}?17!oCzD.5:{9yRwtx>CR(t{r> $tl 7c#t\"><9:\n_#>.Alp%9|r}wx/RnvAC|.-+}6ryh*hr2>z39qRhv-_o7q D+ir&%*nv-%kx)h%C\n:>=*^Btp*76.Cv\"B|-k4q!c](nAt%! [i l_vswmD6v!+D,2j9@{h*lh;((+cC{u\n!x@<mtn7&3%<w-]1]j7h/Cqh=D3ws.*j\"86 7oD/<>l=6/p+kCv<CtAu=+>7sr7p\n= yl4CkC,s*B*hQQ\nOOOOOlukgwyp2h0lgrl5OOOOO", 33);
+  function GetKey() {
+    const _0x534b65 = Decode("OOOOOilnpugwyp2h0lgrl5OOOOO\ntppj!$pihkhui$*+%*^nD;.ihxlmhhzjh)h;$$q9h$lhh_niht3 x.D^,*v _9R3\nR01!Bj?^>9zj6z3o/3l8l\"j!7tv>}^y,_8r}(<$j147 7\"j2={4%uC119sy>A.u)\n2Rnp>k:j9$lAh}{2slD^Co:nz-CD0*,1 \"|w*yn/up.BRl]#s}D=A5$R]!$!y[*,\n>@]#r@\",*?^z.Au7j o@:c_o+8@,h$tihhlj$5i5l(3:o]-y.w5r^7.-;Dy5nqRc\n.o2u7(|6&0>w?1<:pk<i,:cw#?2%%}8z$>0C6+\"y\"n$4nz}A{.ctk@qozB9uuR]\"\n;7z/}:cCzRk:y+(*]&\" vC(7^*=)lyct#_n5 RA=\"|y.RD|yr!\"1ww$D%6&71s{[\n0B2w)=@+m#ql>C4uhxqihv9yCv%4_lrw,?0]c?m y?2t#l]$^90\";%[5By|9x]] \nx:rj|0u.>8Chsx9]1@)7*((B/5x|R>R#C3#?hosp6{ljxxk8k*B{l!>Bt|/4;*y!\n>R|oq#;6\"rA&wj&n*,4p**hA_:3w;q#>+m#3t0\"7({&9phxs|>=mcsj#_]: m}kt\n7 Dkh*h*x.@p4;hz*%*^q*u}?17!oCzD.5:{9yRwtx>CR(t{r> $tl 7c#t\"><9:\n_#>.Alp%9|r}wx/RnvAC|.-+}6ryh*hr2>z39qRhv-_o7q D+ir&%*nv-%kx)h%C\n:>=*^Btp*76.Cv\"B|-k4q!c](nAt%! [i l_vswmD6v!+D,2j9@{h*lh;((+cC{u\n!x@<mtn7&3%<w-]1]j7h/Cqh=D3ws.*j\"86 7oD/<>l=6/p+kCv<CtAu=+>7sr7p\n= yl4CkC,s*B*hQQ\nOOOOOlukgwyp2h0lgrl5OOOOO", 33);
     return _0x534b65;
   }
   function _0x598fc2(_0x31f804) {
@@ -1018,18 +1018,19 @@
     document.body.appendChild(_0x58b988);
     return _0x58b988;
   }
-  function _0x420fa5(_0x4a8174, _0x241314) {
-    let _0x45b42c = '';
-    for (let _0x97db52 = 0; _0x97db52 < _0x4a8174.length; _0x97db52++) {
-      let _0x5718d1 = _0x4a8174[_0x97db52];
-      let _0x5e7f9e = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}|;:\",./<>? ".indexOf(_0x5718d1);
-      if (_0x5e7f9e !== -1) {
-        let _0x2ebbf8 = (_0x5e7f9e - _0x241314 + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}|;:\",./<>? ".length) % "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}|;:\",./<>? ".length;
-        _0x5718d1 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}|;:\",./<>? "[_0x2ebbf8];
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}|;:\",./<>? ";
+  function Decode(str, offset) {
+    let result = '';
+    for (let i = 0; i < str.length; i++) {
+      let char = str[i];
+      let charIndex = alphabet.indexOf(char);
+      if (charIndex !== -1) {
+        let offsetIndex = (charIndex - offset + alphabet.length) % alphabet.length;
+        char = alphabet[offsetIndex];
       }
-      _0x45b42c += _0x5718d1;
+      result += char;
     }
-    return _0x45b42c;
+    return result;
   }
   function _0x52a8ed() {
     const _0x54d721 = document.querySelector("div.MarketplacePanel_coinStack__1l0UD");
@@ -1096,7 +1097,7 @@
         }
       };
       var _0x3ec614 = {
-        'alg': _0x420fa5("VKD589zlwkUVD", 3)
+        'alg': Decode("VKD589zlwkUVD", 3)
       };
       const _0x2c8868 = {
         'original_url': String(_0x4c7095.url),
@@ -1115,7 +1116,7 @@
       }
       const _0x3e7d4c = JSON.stringify(_0x2c8868);
       const _0x7b22e = _0x23abb1();
-      const _0x1a799c = KEYUTIL.getKey(_0x1de009());
+      const _0x1a799c = KEYUTIL.getKey(GetKey());
       var _0x4d0a46 = new KJUR.crypto.Signature(_0x3ec614);
       _0x4d0a46.init(_0x1a799c);
       _0x4d0a46.updateString(_0x3e7d4c + _0x7b22e);
@@ -1180,8 +1181,8 @@
     _0x5577ea.WeVjX = "script_itemLevel";
     _0x5577ea.iIPMH = 'script_key';
     _0x5577ea.khQZd = 'dps-info';
-    const _0xd54380 = "Sbubu" + _0x420fa5("dwdwd", 2);
-    return _0x420fa5(_0xd54380, 1);
+    const _0xd54380 = "Sbubu" + Decode("dwdwd", 2);
+    return Decode(_0xd54380, 1);
   }
   function _0x3ca286() {
     const _0x6200d4 = document.getElementsByTagName("button");
