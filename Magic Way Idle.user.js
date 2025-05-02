@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Magic Way Idle
 // @namespace    http://tampermonkey.net/
-// @version      3.1.0
+// @version      3.1.1
 // @description  法师助手 - VoltaX 修改版 - 去除反用户功能
 // @icon         https://www.milkywayidle.com/favicon.svg
 // @match        https://www.milkywayidle.com/*
@@ -383,17 +383,19 @@
         }
         return _0x400ac0;
       };
-      const _0x5d4c2b = _0x574496();
-      const _0x236c0b = _0x5d4c2b.console = _0x5d4c2b.console || {};
-      const _0xa11d71 = ['log', "warn", "info", "error", 'exception', "table", "trace"];
-      for (let _0x585e9a = 0; _0x585e9a < _0xa11d71.length; _0x585e9a++) {
+      const _window = _0x574496();
+      const _console = _window.console = _window.console || {};
+      const _consoleAttr = ['log', "warn", "info", "error", 'exception', "table", "trace"];
+      /*
+      for (let i = 0; i < _consoleAttr.length; i++) {
         const _0x3af7d8 = _0x4255ed.constructor.prototype.bind(_0x4255ed);
-        const _0x1478ee = _0xa11d71[_0x585e9a];
-        const _0x2b9fbc = _0x236c0b[_0x1478ee] || _0x3af7d8;
+        const attrName = _consoleAttr[i];
+        const _0x2b9fbc = _console[attrName] || _0x3af7d8;
         _0x3af7d8.__proto__ = _0x4255ed.bind(_0x4255ed);
         _0x3af7d8.toString = _0x2b9fbc.toString.bind(_0x2b9fbc);
-        _0x236c0b[_0x1478ee] = _0x3af7d8;
+        _console[attrName] = _0x3af7d8;
       }
+      */
     });
     _0x5f4234();
     if (document.URL.includes("milkywayidle.com")) {
