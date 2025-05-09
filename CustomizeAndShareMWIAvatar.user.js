@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Customize and Share MWI Avatar
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  Allow you to replace your avatar with any image, and share it with other players who also installed this script.
 // @author       VoltaX
 // @match        https://www.milkywayidle.com/*
@@ -177,6 +177,7 @@ const UploadAvatar = async () => {
         }
         else console.error(e);
     };
+    errorSpan.textContent = "准备上传";
     const res = await fetch(`${RemoteHost}${UploadPath}`, {
         method: "POST",
         mode: "cors",
@@ -196,6 +197,24 @@ const UploadAvatar = async () => {
     }
     else errorSpan.textContent = `上传失败：${res.status} ${await res.text()}`;
 };
+const ManualRefresh = async () => {
+    const errorSpan = document.getElementById("custom-avatar-upload-error");
+    avatarCache = undefined;
+    lastUpdated = undefined;
+    errorSpan.textContent = "准备刷新";
+    try{
+        await GetCustomAvatar(PlayerUsername);
+    }
+    catch(e){
+        errorSpan.textContent = "刷新时出现错误，请联系VoltaX";
+    }
+    errorSpan.textContent = "刷新完成";
+    RefreshAvatar();
+};
+const ShowHelp = () => {
+    const errorSpan = document.getElementById("custom-avatar-upload-error");
+    errorSpan.textContent = "帮助信息正在施工中";
+};
 const AddUploadInput = () => {
     const settingDiv = document.querySelector("div.SettingsPanel_profileTab__214Bj:not([avatar-upload-added])");
     if(!settingDiv) return;
@@ -207,7 +226,8 @@ const AddUploadInput = () => {
         HTML("div", {class: "SettingsPanel_value__2nsKD"},
             HTML("input", {id: "custom-avatar-url-input", class: "SettingsPanel_value__2nsKD Input_input__2-t98", placeholder: "输入自定义头像的图床链接"}),
             HTML("button", {class: "Button_button__1Fe9z", _click: UploadAvatar}, "上传"),
-            HTML("button", {class: "Button_button__1Fe9z"}, "帮助"),
+            HTML("button", {class: "Button_button__1Fe9z", _click: ShowHelp}, "帮助"),
+            HTML("button", {class: "Button_button__1Fe9z", _click: ManualRefresh}, "刷新本地缓存"),
         ),
         HTML("div", {class: "SettingsPanel_label__24LRD"}),
         HTML("div", {class: "SettingsPanel_value__2nsKD"},
