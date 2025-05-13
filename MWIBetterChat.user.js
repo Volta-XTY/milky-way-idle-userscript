@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Better MWI Chat
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.2.1
 // @description  Make Chat Great Again!
 // @author       VoltaX
 // @match        https://www.milkywayidle.com/*
@@ -190,7 +190,7 @@ const ProcessChatMessage = () => {
         }, {newLine: false, lines: [HTML("div", {class: "chat-message-line"})]}).lines);
         const repeat = HTML("button", {class: "repeat-msg-button", _click: () => {
             const contentBuilder = [];
-            [...contentWrapper.children].forEach(ele => {
+            [...contentWrapper.children].flatMap(line => [...line.children]).forEach(ele => {
                 if(ele.tagName === "SPAN") contentBuilder.push(ele.innerText);
                 if(ele.tagName === "A") contentBuilder.push(ele.getAttribute("href"));
                 if(ele.tagName === "DIV" && ele.classList.contains("ChatMessage_linkContainer__18Kv3")){
