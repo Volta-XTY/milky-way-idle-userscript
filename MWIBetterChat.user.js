@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Better MWI Chat
 // @namespace    http://tampermonkey.net/
-// @version      1.2.4
+// @version      1.3.0
 // @description  Make Chat Great Again!
 // @author       VoltaX
 // @match        https://www.milkywayidle.com/*
@@ -39,6 +39,7 @@ div.ChatMessage_chatMessage__2wev4[processed]:not([not-modified]){
     flex-direction: column;
 }
 div.chat-message-header{
+    padding: 0px 3px;
     display: flex;
     flex-direction: row;
 }
@@ -55,7 +56,7 @@ div.chat-message-body{
     border-radius: 10px;
     margin: 3px;
     background: var(--color-space-600);
-    padding: 5px 8px;
+    padding: 5px 6px;
     display: flex;
     flex-direction: column;
     flex-wrap: wrap;
@@ -103,6 +104,21 @@ button.repeat-msg-button{
     color: var(--repeat-button-color);
     background: rgba(0, 0, 0, 0);
 }
+button.interact-user-button{
+    margin-left: 6px;
+    margin-right: -4px;
+    width: 24px;
+    height: 20px;
+    opacity: 0;
+    border: 0px none;
+    background: none;
+}
+div.ChatMessage_chatMessage__2wev4:hover button.interact-user-button{
+    opacity: 1;
+}
+button.interact-user-button:hover{
+    cursor: pointer;
+}
 div.input-wrapper{
     flex-grow: 1;
 }
@@ -143,7 +159,11 @@ const html = (html) => {
     return t.content.firstElementChild;
 };
 const svg_cross = html(`<svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 15" height="20px" focusable="false"> <path fill="currentColor" fillRule="evenodd" d="M11.782 4.032a.575.575 0 1 0-.813-.814L7.5 6.687L4.032 3.218a.575.575 0 0 0-.814.814L6.687 7.5l-3.469 3.468a.575.575 0 0 0 .814.814L7.5 8.313l3.469 3.469a.575.575 0 0 0 .813-.814L8.313 7.5z" clipRule="evenodd"/> </svg>`);
-const svg_mention = html(`<svg width="800px" height="800px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"> <!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools --> <title>ic_fluent_mention_24_regular</title> <desc>Created with Sketch.</desc> <g id="🔍-Product-Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="ic_fluent_mention_24_regular" fill="#212121" fill-rule="nonzero"> <path d="M22,12 L22,13.75 C22,15.8210678 20.3210678,17.5 18.25,17.5 C16.7458289,17.5 15.4485014,16.6143971 14.8509855,15.3361594 C14.032894,16.3552078 12.8400151,17 11.5,17 C8.99236936,17 7,14.7419814 7,12 C7,9.25801861 8.99236936,7 11.5,7 C12.6590052,7 13.7079399,7.48235986 14.5009636,8.27192046 L14.5,7.75 C14.5,7.33578644 14.8357864,7 15.25,7 C15.6296958,7 15.943491,7.28215388 15.9931534,7.64822944 L16,7.75 L16,13.75 C16,14.9926407 17.0073593,16 18.25,16 C19.440864,16 20.4156449,15.0748384 20.4948092,13.9040488 L20.5,13.75 L20.5,12 C20.5,7.30557963 16.6944204,3.5 12,3.5 C7.30557963,3.5 3.5,7.30557963 3.5,12 C3.5,16.6944204 7.30557963,20.5 12,20.5 C13.032966,20.5 14.0394669,20.3160231 14.9851556,19.9612482 C15.3729767,19.8157572 15.8053117,20.0122046 15.9508027,20.4000257 C16.0962937,20.7878469 15.8998463,21.2201818 15.5120251,21.3656728 C14.3985007,21.7834112 13.2135869,22 12,22 C6.4771525,22 2,17.5228475 2,12 C2,6.4771525 6.4771525,2 12,2 C17.4292399,2 21.8479317,6.32667079 21.9961582,11.7200952 L22,12 L22,13.75 L22,12 Z M11.5,8.5 C9.86549502,8.5 8.5,10.047561 8.5,12 C8.5,13.952439 9.86549502,15.5 11.5,15.5 C13.134505,15.5 14.5,13.952439 14.5,12 C14.5,10.047561 13.134505,8.5 11.5,8.5 Z" id="🎨-Color"> </path> </g> </g> </svg>`);
+const svg_mention = html(`<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 10.35C12.9113 10.35 13.65 11.0887 13.65 12C13.65 12.9113 12.9113 13.65 12 13.65C11.0887 13.65 10.35 12.9113 10.35 12C10.35 11.0887 11.0887 10.35 12 10.35Z" fill="#ffffff"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM6.75 12C6.75 9.1005 9.1005 6.75 12 6.75C14.8995 6.75 17.25 9.1005 17.25 12C17.25 12.6327 17.1384 13.2376 16.9345 13.7973C16.8991 13.8944 16.8295 13.9989 16.7183 14.1015L16.6377 14.1758C16.3369 14.4533 15.8853 14.4888 15.5448 14.2618C15.2981 14.0974 15.15 13.8206 15.15 13.5241V12C15.15 10.2603 13.7397 8.85 12 8.85C10.2603 8.85 8.85 10.2603 8.85 12C8.85 13.7397 10.2603 15.15 12 15.15C12.7017 15.15 13.3499 14.9205 13.8735 14.5325C14.0557 14.9233 14.3431 15.2635 14.7127 15.5099C15.6294 16.121 16.8451 16.0252 17.6548 15.2783L17.7354 15.204C17.9855 14.9732 18.211 14.6756 18.3439 14.3108C18.6069 13.5889 18.75 12.8103 18.75 12C18.75 8.27208 15.7279 5.25 12 5.25C8.27208 5.25 5.25 8.27208 5.25 12C5.25 15.7279 8.27208 18.75 12 18.75C12.4142 18.75 12.75 18.4142 12.75 18C12.75 17.5858 12.4142 17.25 12 17.25C9.1005 17.25 6.75 14.8995 6.75 12Z" fill="#ffffff"/>
+</svg>`)
+const svg_whisper = html(`<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.47715 2 2 6.47715 2 12C2 13.8153 2.48451 15.5196 3.33127 16.9883C3.50372 17.2874 3.5333 17.6516 3.38777 17.9647L2.53406 19.8016C2.00986 20.7933 2.72736 22 3.86159 22H12C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM9 9C8.44772 9 8 9.44772 8 10C8 10.5523 8.44772 11 9 11H11C11.5523 11 12 10.5523 12 10C12 9.44772 11.5523 9 11 9H9ZM9 13C8.44772 13 8 13.4477 8 14C8 14.5523 8.44772 15 9 15H15C15.5523 15 16 14.5523 16 14C16 13.4477 15.5523 13 15 13H9Z" fill="#ffffff"/> </svg>`);
 const svg_arrow_head = html(`<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M12 5V19M12 19L6 13M12 19L18 13" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/> </svg>`)
 const InsertStyleSheet = (style) => {
     const s = new CSSStyleSheet();
@@ -162,7 +182,7 @@ const HTML = (tagname, attrs, ...children) => {
             const type = key.slice(1);
             ele.addEventListener(type, value);
         }
-        if(key.charAt(0) === "!"){
+        else if(key.charAt(0) === "!"){
             outputFlag = key.slice(1);
             if(typeof(value) === "object") outputTarget = value;
         }
@@ -183,14 +203,16 @@ const ProcessChatMessage = () => {
         const timeSpan = div.children[0];
         const parent = div.parentElement;
         const isLastChild = parent.querySelector(":scope > div:nth-last-child(1)") === div;
-        timeSpan.classList.add("timespan");
         const nameSpan = div.querySelector(":scope span.ChatMessage_name__1W9tB.ChatMessage_clickable__58ej2")?.parentElement?.parentElement?.parentElement;
         if(!nameSpan) {
             div.setAttribute("not-modified", "");
             return;
         }
+        timeSpan.remove();
+        nameSpan.children[0].children[0].children[1].remove();
+        const username = nameSpan.querySelector(":scope .CharacterName_name__1amXp")?.dataset?.name ?? "";
         const nameWrapper = HTML("div", {class: "chat-message-header"});
-        nameWrapper.replaceChildren(nameSpan, timeSpan);
+        nameWrapper.replaceChildren(nameSpan);
         const bubble = HTML("div", {class: "chat-message-body-wrapper"});
         const contentWrapper = HTML("div", {class: "chat-message-body"});
         contentWrapper.replaceChildren(...[...div.children].reduce(({newLine, lines}, ele) => {
@@ -225,6 +247,22 @@ const ProcessChatMessage = () => {
             if(tracker) tracker.setValue(prevVal);
             input.dispatchEvent(ev);
         }}, "+1");
+        if(username){
+            const DoMentionOrWhisper = (isMention) => () => {
+                const mentionStr = `@${username}`;
+                const input = document.querySelector("input.Chat_chatInput__16dhX");
+                const prevVal = input.value;
+                input.value = isMention ? `${mentionStr} ${prevVal.replaceAll(/@[a-zA-Z0-9]+/g, "")}` : `/w ${username} ${prevVal.replaceAll(/\/w [a-zA-Z0-9]+/g, "")}`;
+                const ev = new Event("input", {bubbles: true});
+                ev.simulated = true;
+                const tracker = input._valueTracker;
+                if(tracker) tracker.setValue(prevVal);
+                input.dispatchEvent(ev);
+            };
+            const mentionBtn = HTML("button", {class: "interact-user-button", _click: DoMentionOrWhisper(true)}, svg_mention.cloneNode(true));
+            const whisperBtn = HTML("button", {class: "interact-user-button", _click: DoMentionOrWhisper(false)}, svg_whisper.cloneNode(true));
+            nameWrapper.append(mentionBtn, whisperBtn);
+        }
         bubble.replaceChildren(contentWrapper, repeatBtn);
         div.replaceChildren(nameWrapper, bubble); 
         const contentHeight = div.getBoundingClientRect().height;
