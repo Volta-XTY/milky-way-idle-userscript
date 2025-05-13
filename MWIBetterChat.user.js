@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Better MWI Chat
 // @namespace    http://tampermonkey.net/
-// @version      1.2.1
+// @version      1.2.2
 // @description  Make Chat Great Again!
 // @author       VoltaX
 // @match        https://www.milkywayidle.com/*
@@ -10,6 +10,9 @@
 // ==/UserScript==
 const css = 
 `
+.mwibetterchat-invisible{
+    opacity: 0;
+}
 .mwibetterchat-disable{
     display: none;
     opacity: 0;
@@ -67,13 +70,14 @@ div.chat-message-body-wrapper{
     align-items: end;
 }
 button.repeat-msg-button:hover, div.chat-message-body-wrapper:hover button.repeat-msg-button, div.ChatMessage_chatMessage__2wev4:hover button.repeat-msg-button{
-    display: inline-block;
+    opacity: 1;
 }
 button.repeat-msg-button:hover{
     cursor: pointer;
 }
 button.repeat-msg-button{
-    display: none;
+    display: inline-block;
+    opacity: 0;
     margin: 3px 3px 6px;
     padding: 0px -2px;
     width: 24px;
