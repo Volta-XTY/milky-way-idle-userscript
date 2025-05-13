@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Better MWI Chat
 // @namespace    http://tampermonkey.net/
-// @version      1.2.3
+// @version      1.2.4
 // @description  Make Chat Great Again!
 // @author       VoltaX
 // @match        https://www.milkywayidle.com/*
@@ -286,25 +286,28 @@ const AddSwitchButton = (chatDiv) => {
     collapse.insertAdjacentElement("afterend", collapsedupe);
 };
 const AddToBottomButton = (chatDiv) => {
-    const temp = {};
     chatDiv.insertAdjacentElement("beforeend",
-        HTML("button", {class: "scroll-to-bottom", "!retVal": temp, _click: () => {
+        HTML("button", {class: "scroll-to-bottom", _click: () => {
             const chat = document.querySelector("div.TabPanel_tabPanel__tXMJF:not(.TabPanel_hidden__26UM3) div.ChatHistory_chatHistory__1EiG3");
             console.log(chat);
             if(!chat) return;
             chat.scrollTop = 99999;
         }}, svg_arrow_head.cloneNode(true))
     );
+};
+const AddToBottomButtonListeners = () => {
+    const btn = document.querySelector("button.scroll-to-bottom");
+    if(!btn) return;
     document.querySelectorAll("div.ChatHistory_chatHistory__1EiG3:not([listening])").forEach(div => {
         div.setAttribute("listening", "");
         div.addEventListener("scroll", (ev) => {
             const t = ev.target;
             const atBottom = t.offsetHeight + t.scrollTop + 25 > t.scrollHeight;
-            if(atBottom) temp.retVal.classList.add("mwibetterchat-disable");
-            else temp.retVal.classList.remove("mwibetterchat-disable");
+            if(atBottom) btn.classList.add("mwibetterchat-disable");
+            else btn.classList.remove("mwibetterchat-disable");
         })
     });
-}
+};
 const MoveChatPannel = (firstInvoked = true) => {
     const chatDiv = document.querySelector(`div.Chat_chat__3DQkj${firstInvoked?":not([moved])":""}`);
     const characterDiv = document.querySelector(`div.CharacterManagement_characterManagement__2PhvW${firstInvoked?":not([moved])":""}`);
@@ -340,6 +343,7 @@ const OnMutate = (mutlist, observer) => {
     observer.disconnect();
     MoveChatPannel();
     ModifyChatInput();
+    AddToBottomButtonListeners();
     ProcessChatMessage();
     observer.observe(document, {subtree: true, childList: true});
 };
