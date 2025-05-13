@@ -10,6 +10,15 @@
 // ==/UserScript==
 const css = 
 `
+.mwibetterchat-disable{
+    display: none;
+}
+.rotate-left{
+    transform: rotate(90deg);
+}
+.rotate-right{
+    transform: rotate(-90deg);
+}
 div.ChatMessage_chatMessage__2wev4[processed]:not([not-modified]){
     display: flex;
     flex-direction: column;
@@ -124,10 +133,25 @@ const ProcessChatMessage = () => {
         */
     })
 }
-const MoveChatPannel = () => {
-    const chatDiv = document.querySelector("div.Chat_chat__3DQkj:not([moved])");
-    const characterDiv = document.querySelector("div.CharacterManagement_characterManagement__2PhvW:not([moved])");
+const AddSwitchButton = (chatDiv) => {
+    const collapse = chatDiv.querySelector(":scope div.TabsComponent_expandCollapseButton__6nOWk");
+    const collapsedupe = collapse.cloneNode(true);
+    const arrowSVG = collapsedupe.children[0];
+    arrowSVG.classList.add("rotate-left");
+    collapsedupe.addEventListener("click", () => {
+        collapse.classList.toggle("mwibetterchat-disable");
+        arrowSVG.classList.toggle("rotate-left");
+        arrowSVG.classList.toggle("rotate-right");
+        MoveChatPannel(false);
+    })
+    collapse.classList.add("mwibetterchat-disable");
+    collapse.insertAdjacentElement("afterend", collapsedupe);
+}
+const MoveChatPannel = (firstInvoked = true) => {
+    const chatDiv = document.querySelector(`div.Chat_chat__3DQkj${firstInvoked?":not([moved])":""}`);
+    const characterDiv = document.querySelector(`div.CharacterManagement_characterManagement__2PhvW${firstInvoked?":not([moved])":""}`);
     if(!chatDiv || !characterDiv) return;
+    if(firstInvoked) AddSwitchButton(chatDiv);
     chatDiv.setAttribute("moved", "");
     characterDiv.setAttribute("moved", "");
     const chatWrapper = chatDiv.parentElement;
