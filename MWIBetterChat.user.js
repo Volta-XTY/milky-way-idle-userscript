@@ -1,13 +1,24 @@
 // ==UserScript==
 // @name         Better MWI Chat
 // @namespace    http://tampermonkey.net/
-// @version      1.2.2
+// @version      1.2.3
 // @description  Make Chat Great Again!
 // @author       VoltaX
 // @match        https://www.milkywayidle.com/*
 // @icon         http://milkywayidle.com/favicon.ico
 // @grant        none
 // ==/UserScript==
+let Setting = {
+};
+const LoadSetting = () => {
+    try{
+        Setting = {...Setting, ...JSON.parse(window.localStorage.getItem("better-chat-settings") ?? "{}")};
+    }
+    catch(e){
+        console.error(e);
+    }
+};
+const SaveSetting = () => window.localStorage.setItem("better-chat-settings", JSON.stringify(Setting));
 const css = 
 `
 .mwibetterchat-invisible{
@@ -62,6 +73,7 @@ img.chat-image{
     display: block;
     max-width: 100%;
     height: auto;
+    border-radius: 5px;
 }
 div.chat-message-body-wrapper{
     display: flex;
@@ -192,12 +204,13 @@ const ProcessChatMessage = () => {
             else lines.at(-1).append(ele);
             return {newLine, lines};
         }, {newLine: false, lines: [HTML("div", {class: "chat-message-line"})]}).lines);
-        const repeat = HTML("button", {class: "repeat-msg-button", _click: () => {
+        const repeatBtn = HTML("button", {class: "repeat-msg-button", _click: () => {
             const contentBuilder = [];
             [...contentWrapper.children].flatMap(line => [...line.children]).forEach(ele => {
                 if(ele.tagName === "SPAN") contentBuilder.push(ele.innerText);
-                if(ele.tagName === "A") contentBuilder.push(ele.getAttribute("href"));
-                if(ele.tagName === "DIV" && ele.classList.contains("ChatMessage_linkContainer__18Kv3")){
+                else if(ele.tagName === "A") contentBuilder.push(ele.getAttribute("href"));
+                else if(ele.tagName === "IMG") contentBuilder.push(ele.getAttribute("src"));
+                else if(ele.tagName === "DIV" && ele.classList.contains("ChatMessage_linkContainer__18Kv3")){
                     const svg = ele.querySelector(':scope svg[aria-label="Skill"]');
                     if(svg) contentBuilder.push(`[${svg.children[0].getAttribute("href").split("#").at(-1)}]`);
                 }
@@ -212,7 +225,7 @@ const ProcessChatMessage = () => {
             if(tracker) tracker.setValue(prevVal);
             input.dispatchEvent(ev);
         }}, "+1");
-        bubble.replaceChildren(contentWrapper, repeat);
+        bubble.replaceChildren(contentWrapper, repeatBtn);
         div.replaceChildren(nameWrapper, bubble); 
         const contentHeight = div.getBoundingClientRect().height;
         if(isLastChild && (parent.offsetHeight + parent.scrollTop + contentHeight > parent.scrollHeight)) parent.scrollTop = parent.scrollTop + contentHeight;
