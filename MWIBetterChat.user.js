@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Better MWI Chat
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  Make Chat Great Again!
 // @author       VoltaX
 // @match        https://www.milkywayidle.com/*
@@ -44,7 +44,31 @@ div.chat-message-body{
     flex-shrink: 1;
     width: fit-content;
 }
-div.chat-message-body{
+div.chat-message-body-wrapper{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: no-wrap;
+    align-items: end;
+}
+button.repeat-msg-button:hover, div.chat-message-body-wrapper:hover button.repeat-msg-button, div.ChatMessage_chatMessage__2wev4:hover button.repeat-msg-button{
+    display: inline-block;
+}
+button.repeat-msg-button:hover{
+    cursor: pointer;
+}
+button.repeat-msg-button{
+    display: none;
+    margin: 3px 3px 6px;
+    padding: 0px -2px;
+    width: 24px;
+    height: 24px;
+    line-height: 16px;
+    font-size: 10px;
+    text-wrap: nowrap;
+    border-radius: 12px;
+    border: 2px solid #0099ff;
+    color: #0099ff;
+    background: rgba(0, 0, 0, 0);
 }
 `;
 const InsertStyleSheet = (style) => {
@@ -86,9 +110,22 @@ const ProcessChatMessage = () => {
         }
         const nameWrapper = HTML("div", {class: "chat-message-header"});
         nameWrapper.replaceChildren(nameSpan, timeSpan);
+        const bubble = HTML("div", {class: "chat-message-body-wrapper"});
         const contentWrapper = HTML("div", {class: "chat-message-body"});
         contentWrapper.replaceChildren(...[...div.children]);
-        div.replaceChildren(nameWrapper, contentWrapper); 
+        const repeat = HTML("button", {class: "repeat-msg-button", _click: () => {
+            const content = contentWrapper.innerText;
+            const input = document.querySelector("input.Chat_chatInput__16dhX");
+            const prevVal = input.value;
+            input.value = content;
+            const ev = new Event("input", {bubbles: true});
+            ev.simulated = true;
+            const tracker = input._valueTracker;
+            if(tracker) tracker.setValue(prevVal);
+            input.dispatchEvent(ev);
+        }}, "+1");
+        bubble.replaceChildren(contentWrapper, repeat);
+        div.replaceChildren(nameWrapper, bubble); 
         const contentHeight = div.getBoundingClientRect().height;
         if(isLastChild && (parent.offsetHeight + parent.scrollTop + contentHeight > parent.scrollHeight)) parent.scrollTop = parent.scrollTop + contentHeight;
         /*
@@ -132,7 +169,7 @@ const ProcessChatMessage = () => {
         );
         */
     })
-}
+};
 const AddSwitchButton = (chatDiv) => {
     const collapse = chatDiv.querySelector(":scope div.TabsComponent_expandCollapseButton__6nOWk");
     const collapsedupe = collapse.cloneNode(true);
@@ -146,7 +183,7 @@ const AddSwitchButton = (chatDiv) => {
     })
     collapse.classList.add("mwibetterchat-disable");
     collapse.insertAdjacentElement("afterend", collapsedupe);
-}
+};
 const MoveChatPannel = (firstInvoked = true) => {
     const chatDiv = document.querySelector(`div.Chat_chat__3DQkj${firstInvoked?":not([moved])":""}`);
     const characterDiv = document.querySelector(`div.CharacterManagement_characterManagement__2PhvW${firstInvoked?":not([moved])":""}`);
@@ -157,7 +194,7 @@ const MoveChatPannel = (firstInvoked = true) => {
     const chatWrapper = chatDiv.parentElement;
     characterDiv.replaceWith(chatDiv);
     chatWrapper.replaceChildren(characterDiv);
-}
+};
 const ManageScrolling = () => {
     document.querySelectorAll("div.ChatHistory_chatHistory__1EiG3:not([listening])").forEach(div => {
         div.setAttribute("listening", "");
