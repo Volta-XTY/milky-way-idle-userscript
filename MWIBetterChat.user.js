@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Better MWI Chat
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @description  Make Chat Great Again!
 // @author       VoltaX
 // @match        https://www.milkywayidle.com/*
@@ -12,6 +12,7 @@ const css =
 `
 .mwibetterchat-disable{
     display: none;
+    opacity: 0;
 }
 .rotate-left{
     transform: rotate(90deg);
@@ -33,16 +34,31 @@ div.chat-message-header span.timespan{
 div.chat-message-header:hover span.timespan{
     display: auto;
 }
+input.Chat_chatInput__16dhX{
+    width: 100%;
+}
 div.chat-message-body{
     border-radius: 10px;
     margin: 3px;
-    background: #4357af;
+    background: var(--color-space-600);
     padding: 5px 8px;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     flex-wrap: wrap;
     flex-shrink: 1;
     width: fit-content;
+}
+div.chat-message-line{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: fit-content;
+}
+img.chat-image{
+    margin: 3px 0px;
+    display: block;
+    max-width: 100%;
+    height: auto;
 }
 div.chat-message-body-wrapper{
     display: flex;
@@ -66,11 +82,53 @@ button.repeat-msg-button{
     font-size: 10px;
     text-wrap: nowrap;
     border-radius: 12px;
-    border: 2px solid #0099ff;
-    color: #0099ff;
+    --repeat-button-color: var(--color-ocean-250);
+    border: 2px solid var(--repeat-button-color);
+    color: var(--repeat-button-color);
     background: rgba(0, 0, 0, 0);
 }
+div.input-wrapper{
+    flex-grow: 1;
+}
+button.input-clear-button{
+    position: absolute;
+    right: 62px;
+    top: 4px;
+    background: none;
+    border: none;
+}
+button.input-clear-button:hover{
+    cursor: pointer;
+}
+button.scroll-to-bottom{
+    position: absolute;
+    height: 40px;
+    width: 40px;
+    border-radius: 20px;
+    border: none;
+    background: var(--color-market-buy);
+    bottom: 40px;
+    right: 10px;
+    opacity: 1;
+    @starting-style{
+        opacity: 0;
+    }
+    transition: 0.3s ease allow-discrete;
+}
+button.scroll-to-bottom:hover{
+    cursor: pointer;
+    background: var(--color-market-buy-hover);
+    opacity: 1;
+}
 `;
+const html = (html) => {
+    const t = document.createElement("template");
+    t.innerHTML = html;
+    return t.content.firstElementChild;
+};
+const svg_cross = html(`<svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15 15" height="20px" focusable="false"> <path fill="currentColor" fillRule="evenodd" d="M11.782 4.032a.575.575 0 1 0-.813-.814L7.5 6.687L4.032 3.218a.575.575 0 0 0-.814.814L6.687 7.5l-3.469 3.468a.575.575 0 0 0 .814.814L7.5 8.313l3.469 3.469a.575.575 0 0 0 .813-.814L8.313 7.5z" clipRule="evenodd"/> </svg>`);
+const svg_mention = html(`<svg width="800px" height="800px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"> <!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools --> <title>ic_fluent_mention_24_regular</title> <desc>Created with Sketch.</desc> <g id="🔍-Product-Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="ic_fluent_mention_24_regular" fill="#212121" fill-rule="nonzero"> <path d="M22,12 L22,13.75 C22,15.8210678 20.3210678,17.5 18.25,17.5 C16.7458289,17.5 15.4485014,16.6143971 14.8509855,15.3361594 C14.032894,16.3552078 12.8400151,17 11.5,17 C8.99236936,17 7,14.7419814 7,12 C7,9.25801861 8.99236936,7 11.5,7 C12.6590052,7 13.7079399,7.48235986 14.5009636,8.27192046 L14.5,7.75 C14.5,7.33578644 14.8357864,7 15.25,7 C15.6296958,7 15.943491,7.28215388 15.9931534,7.64822944 L16,7.75 L16,13.75 C16,14.9926407 17.0073593,16 18.25,16 C19.440864,16 20.4156449,15.0748384 20.4948092,13.9040488 L20.5,13.75 L20.5,12 C20.5,7.30557963 16.6944204,3.5 12,3.5 C7.30557963,3.5 3.5,7.30557963 3.5,12 C3.5,16.6944204 7.30557963,20.5 12,20.5 C13.032966,20.5 14.0394669,20.3160231 14.9851556,19.9612482 C15.3729767,19.8157572 15.8053117,20.0122046 15.9508027,20.4000257 C16.0962937,20.7878469 15.8998463,21.2201818 15.5120251,21.3656728 C14.3985007,21.7834112 13.2135869,22 12,22 C6.4771525,22 2,17.5228475 2,12 C2,6.4771525 6.4771525,2 12,2 C17.4292399,2 21.8479317,6.32667079 21.9961582,11.7200952 L22,12 L22,13.75 L22,12 Z M11.5,8.5 C9.86549502,8.5 8.5,10.047561 8.5,12 C8.5,13.952439 9.86549502,15.5 11.5,15.5 C13.134505,15.5 14.5,13.952439 14.5,12 C14.5,10.047561 13.134505,8.5 11.5,8.5 Z" id="🎨-Color"> </path> </g> </g> </svg>`);
+const svg_arrow_head = html(`<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M12 5V19M12 19L6 13M12 19L18 13" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/> </svg>`)
 const InsertStyleSheet = (style) => {
     const s = new CSSStyleSheet();
     s.replaceSync(style);
@@ -80,11 +138,17 @@ InsertStyleSheet(css);
 const HTML = (tagname, attrs, ...children) => {
     if(attrs === undefined) return document.createTextNode(tagname);
     const ele = document.createElement(tagname);
+    let outputFlag = false;
+    let outputTarget = null;
     if(attrs) for(const [key, value] of Object.entries(attrs)){
         if(value === null || value === undefined) continue;
         if(key.charAt(0) === "_"){
             const type = key.slice(1);
             ele.addEventListener(type, value);
+        }
+        if(key.charAt(0) === "!"){
+            outputFlag = key.slice(1);
+            if(typeof(value) === "object") outputTarget = value;
         }
         else if(key === "eventListener"){
             for(const listener of value){
@@ -94,6 +158,7 @@ const HTML = (tagname, attrs, ...children) => {
         else ele.setAttribute(key, value);
     }
     for(const child of children) if(child) ele.append(child);
+    if(outputFlag && outputTarget) outputTarget[outputFlag] = ele;
     return ele;
 };
 const ProcessChatMessage = () => {
@@ -112,12 +177,31 @@ const ProcessChatMessage = () => {
         nameWrapper.replaceChildren(nameSpan, timeSpan);
         const bubble = HTML("div", {class: "chat-message-body-wrapper"});
         const contentWrapper = HTML("div", {class: "chat-message-body"});
-        contentWrapper.replaceChildren(...[...div.children]);
+        contentWrapper.replaceChildren(...[...div.children].reduce(({newLine, lines}, ele) => {
+            if(ele.tagName === "A" && ele.type?.includes("image/") || /\.(?:apng|avif|bmp|gif|ico|jpeg|jpg|png|tif|tiff|webp)$/.test(ele.href)){
+                lines.push(HTML("div", {class: "chat-message-line"},
+                    HTML("img", {class: "chat-image", src: ele.href})
+                ));
+                newLine = true;
+            }
+            else if(newLine) lines.push(HTML("div", {class: "chat-message-line"}, ele));
+            else lines.at(-1).append(ele);
+            return {newLine, lines};
+        }, {newLine: false, lines: [HTML("div", {class: "chat-message-line"})]}).lines);
         const repeat = HTML("button", {class: "repeat-msg-button", _click: () => {
-            const content = contentWrapper.innerText;
+            const contentBuilder = [];
+            [...contentWrapper.children].forEach(ele => {
+                if(ele.tagName === "SPAN") contentBuilder.push(ele.innerText);
+                if(ele.tagName === "A") contentBuilder.push(ele.getAttribute("href"));
+                if(ele.tagName === "DIV" && ele.classList.contains("ChatMessage_linkContainer__18Kv3")){
+                    const svg = ele.querySelector(':scope svg[aria-label="Skill"]');
+                    if(svg) contentBuilder.push(`[${svg.children[0].getAttribute("href").split("#").at(-1)}]`);
+                }
+            });
+            console.log(contentBuilder);
             const input = document.querySelector("input.Chat_chatInput__16dhX");
             const prevVal = input.value;
-            input.value = content;
+            input.value = contentBuilder.join("");
             const ev = new Event("input", {bubbles: true});
             ev.simulated = true;
             const tracker = input._valueTracker;
@@ -184,32 +268,61 @@ const AddSwitchButton = (chatDiv) => {
     collapse.classList.add("mwibetterchat-disable");
     collapse.insertAdjacentElement("afterend", collapsedupe);
 };
+const AddToBottomButton = (chatDiv) => {
+    const temp = {};
+    chatDiv.insertAdjacentElement("beforeend",
+        HTML("button", {class: "scroll-to-bottom", "!retVal": temp, _click: () => {
+            const chat = document.querySelector("div.TabPanel_tabPanel__tXMJF:not(.TabPanel_hidden__26UM3) div.ChatHistory_chatHistory__1EiG3");
+            console.log(chat);
+            if(!chat) return;
+            chat.scrollTop = 99999;
+        }}, svg_arrow_head.cloneNode(true))
+    );
+    document.querySelectorAll("div.ChatHistory_chatHistory__1EiG3:not([listening])").forEach(div => {
+        div.setAttribute("listening", "");
+        div.addEventListener("scroll", (ev) => {
+            const t = ev.target;
+            const atBottom = t.offsetHeight + t.scrollTop + 25 > t.scrollHeight;
+            if(atBottom) temp.retVal.classList.add("mwibetterchat-disable");
+            else temp.retVal.classList.remove("mwibetterchat-disable");
+        })
+    });
+}
 const MoveChatPannel = (firstInvoked = true) => {
     const chatDiv = document.querySelector(`div.Chat_chat__3DQkj${firstInvoked?":not([moved])":""}`);
     const characterDiv = document.querySelector(`div.CharacterManagement_characterManagement__2PhvW${firstInvoked?":not([moved])":""}`);
     if(!chatDiv || !characterDiv) return;
-    if(firstInvoked) AddSwitchButton(chatDiv);
+    if(firstInvoked){
+        AddSwitchButton(chatDiv);
+        AddToBottomButton(chatDiv);
+    }
     chatDiv.setAttribute("moved", "");
     characterDiv.setAttribute("moved", "");
     const chatWrapper = chatDiv.parentElement;
     characterDiv.replaceWith(chatDiv);
     chatWrapper.replaceChildren(characterDiv);
 };
-const ManageScrolling = () => {
-    document.querySelectorAll("div.ChatHistory_chatHistory__1EiG3:not([listening])").forEach(div => {
-        div.setAttribute("listening", "");
-        div.addEventListener("scroll", (ev) => {
-            const t = ev.target;
-            const shouldScrollToBottom = t.offsetHeight + t.scrollTop + 25 > t.scrollHeight;
-            console.log("called", shouldScrollToBottom, t.offsetHeight, t.scrollTop, t.scrollHeight);
-            if(shouldScrollToBottom) t.scrollTop = 99999;
-        })
-    })
-}
+const ModifyChatInput = () => {
+    const input = document.querySelector("input.Chat_chatInput__16dhX:not([clear-button-added])");
+    if(!input) return;
+    input.setAttribute("clear-button-added", "");
+    const wrapper = HTML("div", {class: "input-wrapper"});
+    const clearBtn = HTML("button", {class: "input-clear-button", _click: () => {
+        const prevVal = input.value;
+        input.value = ""
+        const ev = new Event("input", {bubbles: true});
+        ev.simulated = true;
+        const tracker = input._valueTracker;
+        if(tracker) tracker.setValue(prevVal);
+        input.dispatchEvent(ev);
+    }}, svg_cross.cloneNode(true));
+    input.replaceWith(wrapper);
+    wrapper.replaceChildren(input, clearBtn);
+};
 const OnMutate = (mutlist, observer) => {
     observer.disconnect();
     MoveChatPannel();
-    //ManageScrolling();
+    ModifyChatInput();
     ProcessChatMessage();
     observer.observe(document, {subtree: true, childList: true});
 };
