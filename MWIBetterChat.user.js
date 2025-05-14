@@ -10,6 +10,7 @@
 // ==/UserScript==
 let Setting = {
 };
+//let playerUsername = "";
 const LoadSetting = () => {
     try{
         Setting = {...Setting, ...JSON.parse(window.localStorage.getItem("better-chat-settings") ?? "{}")};
@@ -62,6 +63,9 @@ div.chat-message-body{
     flex-wrap: wrap;
     flex-shrink: 1;
     width: fit-content;
+}
+div.chat-message-body.mentioned{
+    background: var(--color-ocean-400);
 }
 div.chat-message-line{
     display: flex;
@@ -216,6 +220,9 @@ const ProcessChatMessage = () => {
         const bubble = HTML("div", {class: "chat-message-body-wrapper"});
         const contentWrapper = HTML("div", {class: "chat-message-body"});
         contentWrapper.replaceChildren(...[...div.children].reduce(({newLine, lines}, ele) => {
+            // test if content mentions user
+            //if(playerUsername && ele.tagName === "SPAN" && ele.innerText.includes(`@${playerUsername}`)) contentWrapper.classList.add("mentioned");
+            // replace img link to <img> element
             if(ele.tagName === "A" && ele.type?.includes("image/") || /\.(?:apng|avif|bmp|gif|ico|jpeg|jpg|png|tif|tiff|webp)$/.test(ele.href)){
                 lines.push(HTML("div", {class: "chat-message-line"},
                     HTML("img", {class: "chat-image", src: ele.href})
@@ -267,46 +274,6 @@ const ProcessChatMessage = () => {
         div.replaceChildren(nameWrapper, bubble); 
         const contentHeight = div.getBoundingClientRect().height;
         if(isLastChild && (parent.offsetHeight + parent.scrollTop + contentHeight > parent.scrollHeight)) parent.scrollTop = parent.scrollTop + contentHeight;
-        /*
-        const texts = [...div.querySelectorAll(`:scope > span:not([style="display: inline-block;"]):not(.ChatMessage_timestamp__1iRZO)`)];
-        texts.forEach(text => text.textContent = text.textContent.replaceAll("喵", ""));
-        const userName = div.querySelector(":scope div.CharacterName_name__1amXp")?.dataset?.name;
-        if(!userName) return;
-        const content = texts.map(span => span.textContent).join("");
-        if(content.length > 0){
-            const DoRepeat = () => {
-                const input = document.querySelector("input.Chat_chatInput__16dhX");
-                const prevVal = input.value;
-                input.value = content;
-                const ev = new Event("input", {bubbles: true});
-                ev.simulated = true;
-                const tracker = input._valueTracker;
-                if(tracker) tracker.setValue(prevVal);
-                input.dispatchEvent(ev);
-            }
-            div.insertAdjacentElement("beforeend",
-                HTML("button", {class: "comment-improvement-button repeat-comment-button", _click: DoRepeat}, " + 1 ")
-            );
-            texts.forEach(text => text.addEventListener("click", DoRepeat));
-        }
-        const DoMentionOrWhisper = (isMention) => () => {
-            const mentionStr = `@${userName}`;
-            const input = document.querySelector("input.Chat_chatInput__16dhX");
-            const prevVal = input.value;
-            input.value = isMention ? `${mentionStr} ${prevVal.replaceAll(/@[a-zA-Z0-9]+/g, "")}` : `/w ${userName} ${prevVal.replaceAll(/\/w [a-zA-Z0-9]+/g, "")}`;
-            const ev = new Event("input", {bubbles: true});
-            ev.simulated = true;
-            const tracker = input._valueTracker;
-            if(tracker) tracker.setValue(prevVal);
-            input.dispatchEvent(ev);
-        };
-        div.insertAdjacentElement("beforeend",
-            HTML("button", {class: "comment-improvement-button mention-sender-button", _click: DoMentionOrWhisper(true)}, "@此人")
-        );
-        div.insertAdjacentElement("beforeend",
-            HTML("button", {class: "comment-improvement-button whisper-button", _click: DoMentionOrWhisper(false)}, "私聊")
-        );
-        */
     })
 };
 const AddSwitchButton = (chatDiv) => {
@@ -377,8 +344,18 @@ const ModifyChatInput = () => {
     input.replaceWith(wrapper);
     wrapper.replaceChildren(input, clearBtn);
 };
+/*
+const UpdateUsername = () => {
+    if(!playerUsername){
+        const characterInfoDiv = document.querySelector("div.Header_characterInfo__3ixY8");
+        const username = characterInfoDiv?.querySelector(":scope div.CharacterName_name__1amXp")?.dataset?.name;
+        if(username) playerUsername = username;
+    }
+};
+*/
 const OnMutate = (mutlist, observer) => {
     observer.disconnect();
+    //UpdateUsername();
     MoveChatPannel();
     ModifyChatInput();
     AddToBottomButtonListeners();
