@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Better MWI Chat
 // @namespace    http://tampermonkey.net/
-// @version      1.3.0
+// @version      1.3.1
 // @description  Make Chat Great Again!
 // @author       VoltaX
 // @match        https://www.milkywayidle.com/*
@@ -385,4 +385,4 @@ const OnMutate = (mutlist, observer) => {
     ProcessChatMessage();
     observer.observe(document, {subtree: true, childList: true});
 };
-new MutationObserver(OnMutate).observe(document, {subtree: true, childList: true});
+if(window.matchMedia("only screen and (max-width: 1024px)").matches === false) new MutationObserver(OnMutate).observe(document, {subtree: true, childList: true});
