@@ -257,6 +257,7 @@ const ProcessChatMessage = () => {
             const tracker = input._valueTracker;
             if(tracker) tracker.setValue(prevVal);
             input.dispatchEvent(ev);
+            input.focus();
         }}, "+1");
         if(username){
             const DoMentionOrWhisper = (isMention) => () => {
