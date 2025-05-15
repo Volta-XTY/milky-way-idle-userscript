@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Better MWI Chat
 // @namespace    http://tampermonkey.net/
-// @version      1.3.1
+// @version      1.3.2
 // @description  Make Chat Great Again!
 // @author       VoltaX
 // @match        https://www.milkywayidle.com/*
@@ -201,12 +201,16 @@ const HTML = (tagname, attrs, ...children) => {
     if(outputFlag && outputTarget) outputTarget[outputFlag] = ele;
     return ele;
 };
+const KeepAtBottom = (chatMsgDiv, always = false) => {
+    const contentHeight = chatMsgDiv.getBoundingClientRect().height;
+    const parent = chatMsgDiv.parentElement;
+    const flag = always || parent.querySelector(":scope > div:nth-last-child(1)") === chatMsgDiv;
+    if(flag && (parent.offsetHeight + parent.scrollTop + contentHeight > parent.scrollHeight)) parent.scrollTop = parent.scrollTop + contentHeight;
+};
 const ProcessChatMessage = () => {
     document.querySelectorAll("div.ChatHistory_chatHistory__1EiG3 > div.ChatMessage_chatMessage__2wev4:not([processed])").forEach(div => {
         div.setAttribute("processed", "");
         const timeSpan = div.children[0];
-        const parent = div.parentElement;
-        const isLastChild = parent.querySelector(":scope > div:nth-last-child(1)") === div;
         const nameSpan = div.querySelector(":scope span.ChatMessage_name__1W9tB.ChatMessage_clickable__58ej2")?.parentElement?.parentElement?.parentElement;
         if(!nameSpan) {
             div.setAttribute("not-modified", "");
@@ -225,7 +229,7 @@ const ProcessChatMessage = () => {
             // replace img link to <img> element
             if(ele.tagName === "A" && ele.type?.includes("image/") || /\.(?:apng|avif|bmp|gif|ico|jpeg|jpg|png|tif|tiff|webp)$/.test(ele.href)){
                 lines.push(HTML("div", {class: "chat-message-line"},
-                    HTML("img", {class: "chat-image", src: ele.href})
+                    HTML("img", {class: "chat-image", src: ele.href, _load: () => KeepAtBottom(div, true)})
                 ));
                 newLine = true;
             }
@@ -272,8 +276,7 @@ const ProcessChatMessage = () => {
         }
         bubble.replaceChildren(contentWrapper, repeatBtn);
         div.replaceChildren(nameWrapper, bubble); 
-        const contentHeight = div.getBoundingClientRect().height;
-        if(isLastChild && (parent.offsetHeight + parent.scrollTop + contentHeight > parent.scrollHeight)) parent.scrollTop = parent.scrollTop + contentHeight;
+        KeepAtBottom(div);
     })
 };
 const AddSwitchButton = (chatDiv) => {
