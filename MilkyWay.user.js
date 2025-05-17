@@ -4,7 +4,7 @@
 // @version      2025-05-16
 // @description  try to take over the world!
 // @author       VoltaXTY
-// @match        https://www.milkywayidle.com/game?*
+// @match        https://www.milkywayidle.com/*
 // @icon         http://milkywayidle.com/favicon.png
 // @require      https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js
 // @require      https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js
@@ -1313,6 +1313,18 @@ const HTML = (tagname, attrs, ...children) => {
     if(REG_FLAG) REG_HTML = ele;
     return ele;
 };
+const ShowNotification = (texts) => {
+    const noteArea = document.querySelector("div.GamePage_notifications__1xT_i");
+    if(!noteArea) return;
+    const hiddenClassName = "Notification_hidden__3w7ag";
+    const note = HTML("div", {class: "Notification_notification__3l8oP"},
+        HTML("div", {class: "Notification_text__3fYCr"},
+            ...(texts.split("\n").map(text => HTML("div", {}, text)))
+        )
+    );
+    noteArea.append(note);
+    setTimeout(() => note.classList.add(hiddenClassName), 10000);
+};
 const NotificationHooks = [];
 const GetItem = (key) => {
     try{ return JSON.parse(window.localStorage.getItem("key") ?? ""); }
@@ -1500,9 +1512,28 @@ const UpdateMarketInfo = (info) => {
     if(typeof(CalculateProfit(info.itemHrid)) !== "string") UpdateProfitPanel(info.itemHrid);
 }
 let UserStat = null;
+window.QueryEquipMarket = async () => {
+    ShowNotification("正在读取本地数据库");
+    const history = await IDBRead("MarketInfo", undefined, {isIndex: true, indexName: "itemHrid", multi: true});
+    const filtered = history.filter(record => record.orderBooks.length === 21).reverse();
+    const latest = new Map();
+    filtered.forEach(record => {
+        if(!latest.has(record.itemHrid)) latest.set(record.itemHrid, record);
+        else if(latest.get(record.itemHrid).dateTime < record.dateTime) latest.set(record.itemHrid, record);
+    });
+    await navigator.clipboard.write([
+        new ClipboardItem({
+            "text/plain": JSON.stringify(Object.fromEntries(latest)),
+        })
+    ]);
+    ShowNotification("所有装备的最新市场信息已复制到剪贴板")
+};
 window.QueryMarket = async (itemHrid, askData = true) => {
-    let result = await IDBRead("MarketInfo", undefined, {isIndex: true, indexName: "itemHrid", multi: true})
-    result = result.filter(a => a.itemHrid === itemHrid).sort((a, b) => b.dateTime - a.dateTime).map(a => {
+    let result = await IDBRead("MarketInfo", undefined, {isIndex: true, indexName: "itemHrid", multi: true});
+    const filtered = result.filter(a => a.itemHrid === itemHrid);
+    console.log(filtered);
+    /*
+    .sort((a, b) => b.dateTime - a.dateTime).map(a => {
         const arr = askData ? a.orderBooks[0].asks : a.orderBooks[0].bids;
         return {
             dateTime: new Date(a.dateTime).toString(),
@@ -1513,7 +1544,7 @@ window.QueryMarket = async (itemHrid, askData = true) => {
             }, [])
         };
     });
-    console.log(result);
+    */
 }
 window.QueryChat = async (playerName) => {
     let result = await IDBRead("ChatMessage", playerName, {isIndex: true, indexName: "senderName", multi: true});
@@ -1684,18 +1715,17 @@ document.addEventListener("keydown", (ev) => {
     }
     // Plain Keycode
     switch(ev.code){
+        case "Numpad1":
+            if(ev.ctrlKey) QueryEquipMarket();
+            break;
         case "KeyQ":
             FindBackToMarketButton();
             break;
-    }
-    if(!ev.altKey) return;
-    // Alt + Keycode
-    switch(ev.code){
         case "KeyA":
-            ToggleChart("ActivePlayer");
+            if(ev.altKey) ToggleChart("ActivePlayer");
             break;
         case "KeyP":
-            //ToggleProfitPanel();
+            //if(ev.altKey) ToggleProfitPanel();
             break;
     }
 });
